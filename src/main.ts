@@ -90,13 +90,14 @@ function buildTerrainModel() {
     const continentalVariation = Math.abs(Math.sin((lng + 27) * Math.PI / 36) * Math.cos((lat - 12) * Math.PI / 43));
     const latVariation = Math.abs(Math.sin(lat * Math.PI / 180));
     const elevation = isLand
-      ? 80 + continentalVariation * 2200 + latVariation * 900
+      ? 2 + continentalVariation * 2200 + latVariation * 900
       : -(80 + continentalVariation * 4500 + latVariation * 1800);
     terrainCells.push({ elevation, polygon: { type: "Polygon", coordinates: [[[lng, lat], [lng + step, lat], [lng + step, lat + step], [lng, lat + step], [lng, lat]]] } });
   }
 }
 function terrainColor(elevation: number) {
-  if (elevation < state.seaLevel) return elevation < -4000 ? "#173c59" : elevation < -1500 ? "#28617b" : "#66a9b8";
+  if (elevation < state.seaLevel) return elevation >= 0 ? "#3d83a0" : elevation < -4000 ? "#173c59" : elevation < -1500 ? "#28617b" : "#66a9b8";
+  if (elevation < 0) return "#c6b57c";
   return elevation > 3000 ? "#8b735c" : elevation > 1500 ? "#9e9c6b" : elevation > 500 ? "#91b477" : "#b8c98a";
 }
 function drawTerrain(path: d3.GeoPath<any, d3.GeoPermissibleObjects>) {
@@ -133,7 +134,7 @@ function render() {
   context.clearRect(0, 0, width, height); context.fillStyle = t.bg; context.fillRect(0, 0, width, height);
   context.beginPath(); path({ type: "Sphere" }); context.fillStyle = t.sea; context.fill();
   if (state.layers.standardGrid) { context.beginPath(); path(graticule()); context.strokeStyle = t.grid; context.lineWidth = .5; context.stroke(); }
-  if (state.layers.terrain) drawTerrain(path); else { context.beginPath(); path(world); context.fillStyle = t.land; context.fill(); }
+  if (state.layers.terrain) { drawTerrain(path); context.beginPath(); path(world); context.strokeStyle = "rgba(255,255,255,.75)"; context.lineWidth = .8; context.stroke(); } else { context.beginPath(); path(world); context.fillStyle = t.land; context.fill(); }
   if (state.layers.borders) { context.beginPath(); path(borders); context.strokeStyle = t.border; context.lineWidth = .7; context.stroke(); }
   if (state.layers.axisGrid) {
     context.strokeStyle = t.grid; context.lineWidth = .7;
@@ -158,7 +159,7 @@ function refreshCityOptions() { const query = cityQuery.trim().toLocaleLowerCase
 function renderProjectionHelp() { const t = labels[state.lang], guide = projectionGuides[state.lang][state.projection], concepts = orientationGuides[state.lang]; $("projection-help").innerHTML = `<div class="help-head"><strong>${t.projectionInfo}</strong><button id="close-help" type="button">${t.close}</button></div><h3>${guide.name}</h3><h4>${state.lang === "ja" ? "概要" : "Overview"}</h4><p>${guide.overview}</p><h4>${state.lang === "ja" ? "特徴" : "Characteristics"}</h4><p>${guide.features}</p><div class="concept-block"><h4>${state.lang === "ja" ? "今回の中心・軸・極の設定" : "Center, axis and pole settings in this app"}</h4><p><strong>${state.lang === "ja" ? "通常の場合" : "Normal setting"}</strong><br>${guide.normal}</p><p><strong>${state.lang === "ja" ? "変更した場合" : "When changed"}</strong><br>${guide.changed}</p><p><strong>${state.lang === "ja" ? "活用できる場面" : "Useful for"}</strong><br>${guide.useful}</p></div><div class="concept-block"><h4>${state.lang === "ja" ? "現在の操作値" : "Current controls"}</h4><p>${state.lang === "ja" ? "中心" : "Center"}: ${state.lng.toFixed(2)}°, ${state.lat.toFixed(2)}° / ${state.lang === "ja" ? "ロール" : "Roll"}: ${state.roll.toFixed(1)}°</p><p>${concepts.center[0]}</p><p>${concepts.axis[0]}</p><p>${concepts.pole[0]}</p></div>`; $("projection-help").classList.toggle("open", projectionHelpOpen); $("close-help").addEventListener("click", () => { projectionHelpOpen = false; renderProjectionHelp(); }); }
 function setLanguage() { const t = labels[state.lang]; document.documentElement.lang = state.lang === "ja" ? "ja" : "en"; document.title = t.title; document.querySelectorAll<HTMLElement>("[data-label]").forEach(el => { const key = el.dataset.label as keyof typeof t; if (typeof t[key] === "string") el.textContent = t[key] as string; }); document.querySelectorAll<HTMLInputElement>("[data-label-placeholder]").forEach(input => { input.placeholder = t[input.dataset.labelPlaceholder as keyof typeof t] as string; }); document.querySelectorAll<HTMLOptionElement>("[data-projection]").forEach(option => { option.textContent = t.projectionNames[option.dataset.projection as ProjectionName]; }); $("guide").textContent = t.guide; refreshCityOptions(); renderProjectionHelp(); render(); }
 function syncInput() { state.lng = Number($(HTMLInputElement, "lng").value); state.lat = Number($(HTMLInputElement, "lat").value); state.roll = Number($(HTMLInputElement, "roll").value); state.scale = Number($(HTMLInputElement, "scale").value); updateProjection(); render(); }
-function syncSeaLevel() { state.seaLevel = Number($(HTMLInputElement, "sea-level").value); clampState(); render(); }
+function syncSeaLevel() { state.seaLevel = Number($(HTMLInputElement, "sea-level").value); state.layers.terrain = true; ($( "layer-terrain") as HTMLInputElement).checked = true; clampState(); render(); }
 function resize() { const box = $("map-container").getBoundingClientRect(), dpr = window.devicePixelRatio || 1; width = Math.max(1, box.width); height = Math.max(1, box.height); canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); canvas.style.width = `${width}px`; canvas.style.height = `${height}px`; context.setTransform(dpr, 0, 0, dpr, 0, 0); updateProjection(); render(); }
 function exportPng() { const link = document.createElement("a"); link.download = `map-orientation-studio-${state.projection}.png`; link.href = canvas.toDataURL("image/png"); link.click(); }
 
@@ -169,7 +170,7 @@ function buildUI() {
   $("projection").addEventListener("change", e => { state.projection = (e.target as HTMLSelectElement).value as ProjectionName; updateProjection(); render(); });
   $("projection-info").addEventListener("click", () => { projectionHelpOpen = !projectionHelpOpen; renderProjectionHelp(); });
   $("sea-level").addEventListener("input", syncSeaLevel);
-  $("sea-level-preset").addEventListener("change", e => { state.seaLevel = Number((e.target as HTMLSelectElement).value); render(); });
+  $("sea-level-preset").addEventListener("change", e => { state.seaLevel = Number((e.target as HTMLSelectElement).value); state.layers.terrain = true; ($( "layer-terrain") as HTMLInputElement).checked = true; render(); });
   $("city").addEventListener("change", e => { [state.lng, state.lat] = JSON.parse((e.target as HTMLSelectElement).value); updateProjection(); render(); });
   $("city-compare").addEventListener("change", e => { compareCoord = JSON.parse((e.target as HTMLSelectElement).value); render(); });
   $("pick-a").addEventListener("click", () => { pickTarget = "a"; $("guide").textContent = state.lang === "ja" ? "地図上をクリックして地点Aを指定してください" : "Click the map to set point A"; });
