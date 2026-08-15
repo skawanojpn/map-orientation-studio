@@ -111,7 +111,9 @@ function terrainColor(elevation: number, originalLand: boolean) {
   return elevation < -4000 ? "#173c59" : elevation < -1500 ? "#28617b" : "#66a9b8";
 }
 function drawTerrain(path: d3.GeoPath<any, d3.GeoPermissibleObjects>) {
-  context.globalAlpha = .82;
+  // Keep the existing land mask visible underneath the experimental grid.
+  // This prevents a failed/empty land sample from turning the whole globe blue.
+  context.globalAlpha = .42;
   for (const cell of terrainCells) { context.beginPath(); path(cell.polygon as any); context.fillStyle = terrainColor(cell.elevation, cell.originalLand); context.fill(); }
   context.globalAlpha = 1;
 }
@@ -144,7 +146,7 @@ function render() {
   context.clearRect(0, 0, width, height); context.fillStyle = t.bg; context.fillRect(0, 0, width, height);
   context.beginPath(); path({ type: "Sphere" }); context.fillStyle = t.sea; context.fill();
   if (state.layers.standardGrid) { context.beginPath(); path(graticule()); context.strokeStyle = t.grid; context.lineWidth = .5; context.stroke(); }
-  if (state.layers.terrain) { context.beginPath(); path(world); context.fillStyle = t.land; context.globalAlpha = .25; context.fill(); context.globalAlpha = 1; drawTerrain(path); context.beginPath(); path(world); context.strokeStyle = "rgba(255,255,255,.75)"; context.lineWidth = .8; context.stroke(); } else { context.beginPath(); path(world); context.fillStyle = t.land; context.fill(); }
+  if (state.layers.terrain) { context.beginPath(); path(world); context.fillStyle = t.land; context.globalAlpha = 1; context.fill(); drawTerrain(path); context.globalAlpha = 1; context.beginPath(); path(world); context.strokeStyle = "rgba(255,255,255,.75)"; context.lineWidth = .8; context.stroke(); } else { context.beginPath(); path(world); context.fillStyle = t.land; context.fill(); }
   if (state.layers.borders) { context.beginPath(); path(borders); context.strokeStyle = t.border; context.lineWidth = .7; context.stroke(); }
   if (state.layers.axisGrid) {
     context.strokeStyle = t.grid; context.lineWidth = .7;
