@@ -103,9 +103,12 @@ function buildTerrainModel() {
   }
 }
 function terrainColor(elevation: number, originalLand: boolean) {
-  if (elevation < state.seaLevel) return elevation >= 0 ? "#3d83a0" : elevation < -4000 ? "#173c59" : elevation < -1500 ? "#28617b" : "#66a9b8";
-  if (elevation < 0) return "#c6b57c";
-  return elevation > 3000 ? "#8b735c" : elevation > 1500 ? "#9e9c6b" : elevation > 500 ? "#91b477" : "#b8c98a";
+  if (originalLand) {
+    if (elevation < state.seaLevel) return "#3d83a0";
+    return elevation > 3000 ? "#8b735c" : elevation > 1500 ? "#9e9c6b" : elevation > 500 ? "#91b477" : "#b8c98a";
+  }
+  if (elevation >= state.seaLevel) return "#c6b57c";
+  return elevation < -4000 ? "#173c59" : elevation < -1500 ? "#28617b" : "#66a9b8";
 }
 function drawTerrain(path: d3.GeoPath<any, d3.GeoPermissibleObjects>) {
   context.globalAlpha = .82;
@@ -141,7 +144,7 @@ function render() {
   context.clearRect(0, 0, width, height); context.fillStyle = t.bg; context.fillRect(0, 0, width, height);
   context.beginPath(); path({ type: "Sphere" }); context.fillStyle = t.sea; context.fill();
   if (state.layers.standardGrid) { context.beginPath(); path(graticule()); context.strokeStyle = t.grid; context.lineWidth = .5; context.stroke(); }
-  if (state.layers.terrain) { drawTerrain(path); context.beginPath(); path(world); context.strokeStyle = "rgba(255,255,255,.75)"; context.lineWidth = .8; context.stroke(); } else { context.beginPath(); path(world); context.fillStyle = t.land; context.fill(); }
+  if (state.layers.terrain) { context.beginPath(); path(world); context.fillStyle = t.land; context.globalAlpha = .25; context.fill(); context.globalAlpha = 1; drawTerrain(path); context.beginPath(); path(world); context.strokeStyle = "rgba(255,255,255,.75)"; context.lineWidth = .8; context.stroke(); } else { context.beginPath(); path(world); context.fillStyle = t.land; context.fill(); }
   if (state.layers.borders) { context.beginPath(); path(borders); context.strokeStyle = t.border; context.lineWidth = .7; context.stroke(); }
   if (state.layers.axisGrid) {
     context.strokeStyle = t.grid; context.lineWidth = .7;
