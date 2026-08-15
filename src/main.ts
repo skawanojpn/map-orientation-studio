@@ -146,7 +146,14 @@ function render() {
   context.clearRect(0, 0, width, height); context.fillStyle = t.bg; context.fillRect(0, 0, width, height);
   context.beginPath(); path({ type: "Sphere" }); context.fillStyle = t.sea; context.fill();
   if (state.layers.standardGrid) { context.beginPath(); path(graticule()); context.strokeStyle = t.grid; context.lineWidth = .5; context.stroke(); }
-  if (state.layers.terrain) { context.beginPath(); path(world); context.fillStyle = t.land; context.globalAlpha = 1; context.fill(); drawTerrain(path); context.globalAlpha = 1; context.beginPath(); path(world); context.strokeStyle = "rgba(255,255,255,.75)"; context.lineWidth = .8; context.stroke(); } else { context.beginPath(); path(world); context.fillStyle = t.land; context.fill(); }
+  if (state.layers.terrain) {
+    // Draw the authoritative land polygon after the experimental grid so a
+    // failed terrain sample can never turn the whole map into ocean.
+    drawTerrain(path);
+    context.globalAlpha = 1;
+    context.beginPath(); path(world); context.fillStyle = t.land; context.fill();
+    context.beginPath(); path(world); context.strokeStyle = "rgba(255,255,255,.75)"; context.lineWidth = .8; context.stroke();
+  } else { context.beginPath(); path(world); context.fillStyle = t.land; context.fill(); }
   if (state.layers.borders) { context.beginPath(); path(borders); context.strokeStyle = t.border; context.lineWidth = .7; context.stroke(); }
   if (state.layers.axisGrid) {
     context.strokeStyle = t.grid; context.lineWidth = .7;
