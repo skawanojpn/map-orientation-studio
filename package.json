@@ -1,0 +1,23 @@
+{
+  "name": "map-orientation-studio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build && node scripts/build-gas.mjs && node scripts/build-pages.mjs",
+    "build:gas": "node scripts/build-gas.mjs",
+    "build:pages": "node scripts/build-pages.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "topojson-client": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/topojson-client": "^3.1.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
+}
