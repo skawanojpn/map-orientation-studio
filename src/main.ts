@@ -49,7 +49,7 @@ const state: AppState = { projection: "azimuthal", lng: 139.76, lat: 35.68, roll
 const canvas = document.createElement("canvas");
 const context = canvas.getContext("2d")!;
 let width = 1, height = 1, world: any, borders: any, projection: d3.GeoProjection;
-type TerrainCell = { polygon: { type: "Polygon"; coordinates: [number, number][][] }; elevation: number };
+type TerrainCell = { polygon: { type: "Polygon"; coordinates: [number, number][][] }; elevation: number; originalLand: boolean };
 let terrainCells: TerrainCell[] = [];
 let pointerStart: { x: number; y: number } | null = null;
 const activePointers = new Map<number, { x: number; y: number }>();
@@ -80,29 +80,36 @@ function pointerDistance() { const points = [...activePointers.values()]; return
 function isCityVisible(city: Point) { if (state.projection === "orthographic" && d3.geoDistance([state.lng, state.lat], city.coord) > Math.PI / 2 + 0.01) return false; return Boolean(projection?.(city.coord)); }
 function initialBearing(a: [number, number], b: [number, number]) { const [lon1, lat1, lon2, lat2] = [a[0], a[1], b[0], b[1]].map(d => d * Math.PI / 180); const y = Math.sin(lon2 - lon1) * Math.cos(lat2); const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1); return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; }
 function comparisonCity() { return cities.find(city => city.coord[0] === compareCoord[0] && city.coord[1] === compareCoord[1]); }
+function containsLand(point: [number, number]) {
+  if (!world) return false;
+  if (world.type === "FeatureCollection") return world.features.some((item: any) => d3.geoContains(item, point));
+  // Pass the geometry explicitly; this also avoids differences between d3-geo
+  // versions when the TopoJSON conversion returns a Feature wrapper.
+  return d3.geoContains(world.type === "Feature" ? world.geometry : world, point);
+}
 function buildTerrainModel() {
   if (!world) return;
   const step = 5;
   terrainCells = [];
   for (let lat = -90; lat < 90; lat += step) for (let lng = -180; lng < 180; lng += step) {
     const center: [number, number] = [lng + step / 2, Math.min(89.9, lat + step / 2)];
-    const isLand = d3.geoContains(world, center);
+    const isLand = containsLand(center);
     const continentalVariation = Math.abs(Math.sin((lng + 27) * Math.PI / 36) * Math.cos((lat - 12) * Math.PI / 43));
     const latVariation = Math.abs(Math.sin(lat * Math.PI / 180));
     const elevation = isLand
       ? 2 + continentalVariation * 2200 + latVariation * 900
       : -(80 + continentalVariation * 4500 + latVariation * 1800);
-    terrainCells.push({ elevation, polygon: { type: "Polygon", coordinates: [[[lng, lat], [lng + step, lat], [lng + step, lat + step], [lng, lat + step], [lng, lat]]] } });
+    terrainCells.push({ elevation, originalLand: isLand, polygon: { type: "Polygon", coordinates: [[[lng, lat], [lng + step, lat], [lng + step, lat + step], [lng, lat + step], [lng, lat]]] } });
   }
 }
-function terrainColor(elevation: number) {
+function terrainColor(elevation: number, originalLand: boolean) {
   if (elevation < state.seaLevel) return elevation >= 0 ? "#3d83a0" : elevation < -4000 ? "#173c59" : elevation < -1500 ? "#28617b" : "#66a9b8";
   if (elevation < 0) return "#c6b57c";
   return elevation > 3000 ? "#8b735c" : elevation > 1500 ? "#9e9c6b" : elevation > 500 ? "#91b477" : "#b8c98a";
 }
 function drawTerrain(path: d3.GeoPath<any, d3.GeoPermissibleObjects>) {
   context.globalAlpha = .82;
-  for (const cell of terrainCells) { context.beginPath(); path(cell.polygon as any); context.fillStyle = terrainColor(cell.elevation); context.fill(); }
+  for (const cell of terrainCells) { context.beginPath(); path(cell.polygon as any); context.fillStyle = terrainColor(cell.elevation, cell.originalLand); context.fill(); }
   context.globalAlpha = 1;
 }
 const projectionGuides = { ja: {
