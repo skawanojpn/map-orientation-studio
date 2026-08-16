@@ -33,5 +33,7 @@ label { font-size:12px; }
 .location-coordinates .coordinate-input input { min-width:0; min-height:34px; }
 #comparison { line-height:1.5; }
 .comparison-title { display:block; white-space:nowrap; }
-.comparison-detail { display:block; overflow-wrap:anywhere; }
+.comparison-row { display:grid; grid-template-columns:56px minmax(0,1fr); gap:8px; margin-top:5px; }
+.comparison-row span { opacity:.7; }
+.comparison-row strong { min-width:0; overflow-wrap:anywhere; }
 @media (max-width:720px) { #app { grid-template-columns:1fr; } #sidebar { padding:13px 16px calc(14px + env(safe-area-inset-bottom)); } }
