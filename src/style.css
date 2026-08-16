@@ -12,6 +12,7 @@ h2 { font-size:12px; }
 select, input, button { min-height:38px; padding:8px 10px; font-size:12px; }
 label { font-size:12px; }
 .field-label { display:block; margin:12px 0 6px; font-weight:600; }
+.field-hint { margin:8px 0 0; color:var(--text); opacity:.7; font-size:11px; line-height:1.45; }
 .compact-select { display:grid; grid-template-columns:1fr; gap:6px; align-items:stretch; margin-top:12px; }
 .compact-select select { width:100%; min-height:38px; }
 .readout { font-size:12px; }
@@ -20,4 +21,7 @@ label { font-size:12px; }
 #comparison-controls > .point-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
 #comparison-controls > .point-grid strong { grid-column:1 / -1; }
 #comparison-controls > .point-grid button { grid-column:1 / -1; }
+#comparison-controls > .point-grid .coordinate-input { display:grid; grid-template-columns:42px minmax(0,1fr); align-items:center; gap:6px; }
+#comparison-controls > .point-grid .coordinate-input label { margin:0; font-size:11px; }
+#comparison-controls > .point-grid .coordinate-input input { min-width:0; min-height:34px; }
 @media (max-width:720px) { #app { grid-template-columns:1fr; } #sidebar { padding:13px 16px calc(14px + env(safe-area-inset-bottom)); } }
