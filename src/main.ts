@@ -49,8 +49,9 @@ const state: AppState = { projection: "azimuthal", lng: 139.76, lat: 35.68, roll
 const canvas = document.createElement("canvas");
 const context = canvas.getContext("2d")!;
 let width = 1, height = 1, world: any, borders: any, projection: d3.GeoProjection;
-type TerrainCell = { polygon: { type: "Polygon"; coordinates: [number, number][][] }; elevation: number; originalLand: boolean };
+type TerrainCell = { lng: number; lat: number; polygon: { type: "Polygon"; coordinates: [number, number][][] }; elevation: number; originalLand: boolean };
 let terrainCells: TerrainCell[] = [];
+let terrainDataMode: "loading" | "real" | "fallback" = "loading";
 let pointerStart: { x: number; y: number } | null = null;
 const activePointers = new Map<number, { x: number; y: number }>();
 let pinchStartDistance: number | null = null;
@@ -99,8 +100,49 @@ function buildTerrainModel() {
     const elevation = isLand
       ? 2 + continentalVariation * 2200 + latVariation * 900
       : -(80 + continentalVariation * 4500 + latVariation * 1800);
-    terrainCells.push({ elevation, originalLand: isLand, polygon: { type: "Polygon", coordinates: [[[lng, lat], [lng + step, lat], [lng + step, lat + step], [lng, lat + step], [lng, lat]]] } });
+    terrainCells.push({ lng, lat, elevation, originalLand: isLand, polygon: { type: "Polygon", coordinates: [[[lng, lat], [lng + step, lat], [lng + step, lat + step], [lng, lat + step], [lng, lat]]] } });
   }
+  const byCell = new Map(terrainCells.map(cell => [`${cell.lng},${cell.lat}`, cell]));
+  for (const cell of terrainCells) {
+    const neighbors = [[cell.lng - step, cell.lat], [cell.lng + step, cell.lat], [cell.lng, cell.lat - step], [cell.lng, cell.lat + step]]
+      .map(([lng, lat]) => byCell.get(`${lng},${lat}`));
+    if (neighbors.some(neighbor => neighbor && neighbor.originalLand !== cell.originalLand)) {
+      const coastalBand = .5 + Math.abs(Math.sin((cell.lng + 27) * Math.PI / 36) * Math.cos((cell.lat - 12) * Math.PI / 43)) * 9;
+      cell.elevation = cell.originalLand ? Math.min(cell.elevation, coastalBand) : -Math.min(Math.abs(cell.elevation), coastalBand);
+    }
+  }
+}
+const etopoSampleUrl = "https://oceanwatch.pifsc.noaa.gov/erddap/griddap/ETOPO_2022_v1_60s.csv?z[-87.5:300:87.5][2.5:300:357.5]";
+function cellKey(lng: number, lat: number) { return `${Math.floor((lng + 180) / 5) * 5},${Math.floor((lat + 90) / 5) * 5}`; }
+async function loadRealTerrainData() {
+  try {
+    const response = await fetch(etopoSampleUrl);
+    if (!response.ok) throw new Error(`ETOPO request failed: ${response.status}`);
+    const rows = (await response.text()).trim().split(/\r?\n/).slice(1);
+    const samples = new Map<string, number>();
+    for (const row of rows) {
+      const columns = row.split(",");
+      const lat = Number(columns[0]), rawLng = Number(columns[1]), elevation = Number(columns[2]);
+      if (!Number.isFinite(lat) || !Number.isFinite(rawLng) || !Number.isFinite(elevation)) continue;
+      const lng = rawLng > 180 ? rawLng - 360 : rawLng;
+      samples.set(cellKey(lng, lat), elevation);
+    }
+    if (samples.size < 1000) throw new Error(`ETOPO sample incomplete: ${samples.size}`);
+    let matched = 0;
+    for (const cell of terrainCells) {
+      const elevation = samples.get(`${cell.lng},${cell.lat}`);
+      if (elevation === undefined) continue;
+      cell.elevation = elevation;
+      cell.originalLand = elevation >= 0;
+      matched += 1;
+    }
+    if (matched < 1000) throw new Error(`ETOPO grid mismatch: ${matched}`);
+    terrainDataMode = "real";
+  } catch (error) {
+    console.warn("ETOPO terrain data unavailable; using the conceptual fallback model.", error);
+    terrainDataMode = "fallback";
+  }
+  render();
 }
 function terrainColor(elevation: number, originalLand: boolean) {
   if (originalLand) {
@@ -110,12 +152,37 @@ function terrainColor(elevation: number, originalLand: boolean) {
   if (elevation >= state.seaLevel) return "#c6b57c";
   return elevation < -4000 ? "#173c59" : elevation < -1500 ? "#28617b" : "#66a9b8";
 }
+function seaLevelChanges() {
+  return terrainCells.reduce((result, cell) => {
+    if (cell.originalLand && cell.elevation < state.seaLevel) result.flooded += 1;
+    if (!cell.originalLand && cell.elevation >= state.seaLevel) result.exposed += 1;
+    return result;
+  }, { flooded: 0, exposed: 0 });
+}
+function drawTerrainCell(cell: TerrainCell) {
+  const projected = cell.polygon.coordinates[0].map(coord => projection(coord as [number, number]));
+  if (projected.some(point => !point || !Number.isFinite(point[0]) || !Number.isFinite(point[1]))) return false;
+  const points = projected as [number, number][];
+  context.beginPath();
+  context.moveTo(points[0][0], points[0][1]);
+  for (const point of points.slice(1)) context.lineTo(point[0], point[1]);
+  context.closePath();
+  return true;
+}
 function drawTerrain(path: d3.GeoPath<any, d3.GeoPermissibleObjects>) {
-  // Keep the existing land mask visible underneath the experimental grid.
-  // This prevents a failed/empty land sample from turning the whole globe blue.
-  context.globalAlpha = .42;
-  for (const cell of terrainCells) { context.beginPath(); path(cell.polygon as any); context.fillStyle = terrainColor(cell.elevation, cell.originalLand); context.fill(); }
+  for (const cell of terrainCells) {
+    const flooded = cell.originalLand && cell.elevation < state.seaLevel;
+    const exposed = !cell.originalLand && cell.elevation >= state.seaLevel;
+    const showBathymetry = !cell.originalLand && !exposed;
+    if (!flooded && !exposed && !showBathymetry) continue;
+    if (!drawTerrainCell(cell)) continue;
+    context.globalAlpha = flooded || exposed ? .88 : .32;
+    context.fillStyle = flooded ? "#20b8e8" : exposed ? "#ffd166" : terrainColor(cell.elevation, false);
+    context.fill();
+    if (flooded || exposed) { context.globalAlpha = .98; context.strokeStyle = flooded ? "#d7f7ff" : "#fff2ba"; context.lineWidth = 1; context.stroke(); }
+  }
   context.globalAlpha = 1;
+  return seaLevelChanges();
 }
 const projectionGuides = { ja: {
   azimuthal: { name: "正距方位図法", overview: "指定した中心地点から各地点までの距離と方位を正しく表す方位図法です。中心からの大圏距離が地図上の半径に対応します。", features: "中心から離れるほど形や面積の歪みが増え、表示できる最大距離は地球の反対側付近までです。極を中心にすると経線が中心から放射状に並びます。", normal: "通常は北極を中心にした極方位図、または特定の都市を中心にして北を上にした地図として使います。軸は経線・緯線の基準方向です。", changed: "中心を東京や任意の地点へ移すと、その地点から見た距離と方位の関係が読みやすくなります。ロールを変えると、中心を正面にしたまま地図の上下左右の基準を回せます。", useful: "航空路、通信・到達範囲、中心都市からの距離比較、極域の航路分析に役立ちます." },
@@ -146,12 +213,10 @@ function render() {
   context.clearRect(0, 0, width, height); context.fillStyle = t.bg; context.fillRect(0, 0, width, height);
   context.beginPath(); path({ type: "Sphere" }); context.fillStyle = t.sea; context.fill();
   if (state.layers.standardGrid) { context.beginPath(); path(graticule()); context.strokeStyle = t.grid; context.lineWidth = .5; context.stroke(); }
+  let changes = { flooded: 0, exposed: 0 };
   if (state.layers.terrain) {
-    // Draw the authoritative land polygon after the experimental grid so a
-    // failed terrain sample can never turn the whole map into ocean.
-    drawTerrain(path);
-    context.globalAlpha = 1;
     context.beginPath(); path(world); context.fillStyle = t.land; context.fill();
+    changes = drawTerrain(path);
     context.beginPath(); path(world); context.strokeStyle = "rgba(255,255,255,.75)"; context.lineWidth = .8; context.stroke();
   } else { context.beginPath(); path(world); context.fillStyle = t.land; context.fill(); }
   if (state.layers.borders) { context.beginPath(); path(borders); context.strokeStyle = t.border; context.lineWidth = .7; context.stroke(); }
@@ -165,7 +230,7 @@ function render() {
   if (state.projection === "azimuthal" && state.layers.circles) { context.strokeStyle = t.circle; context.lineWidth = 1.1; context.setLineDash([4, 6]); for (let km = 30; km < 180; km += 30) { context.beginPath(); path(d3.geoCircle().center([state.lng, state.lat]).radius(km)()); context.stroke(); } context.setLineDash([]); }
   if (state.layers.axis) { context.strokeStyle = "#f0f"; context.setLineDash([5, 5]); context.beginPath(); context.moveTo(width / 2, 0); context.lineTo(width / 2, height); context.moveTo(0, height / 2); context.lineTo(width, height / 2); context.stroke(); context.setLineDash([]); }
   if (state.layers.cities) { context.font = `${width < 520 ? 8 : 10}px SF Mono, Menlo, monospace`; context.fillStyle = t.accent; for (const city of cities) { const p = projection(city.coord); if (cityMode === "major" && !isMajorCity(city)) continue; if (!isCityVisible(city) || !p || p[0] <= 0 || p[0] >= width || p[1] <= 0 || p[1] >= height) continue; context.beginPath(); context.arc(p[0], p[1], 2, 0, Math.PI * 2); context.fill(); context.fillText(cityName(city), p[0] + 5, p[1] + 3); } }
-  updateInputs(); $("sea-level-readout").textContent = `${state.lang === "ja" ? "設定値" : "Set value"}: ${state.seaLevel > 0 ? "+" : ""}${Math.round(state.seaLevel)} m`; applyTheme(t); updateReadout(); updateComparisonReadout(); if (projectionHelpOpen) renderProjectionHelp(); persistState();
+  updateInputs(); const dataLabel = terrainDataMode === "real" ? (state.lang === "ja" ? "実データ" : "Real data") : terrainDataMode === "loading" ? (state.lang === "ja" ? "読み込み中" : "Loading") : (state.lang === "ja" ? "概念モデル" : "Concept model"); $("sea-level-readout").textContent = `${state.lang === "ja" ? "設定値" : "Set value"}: ${state.seaLevel > 0 ? "+" : ""}${Math.round(state.seaLevel)} m / ${dataLabel}${state.layers.terrain ? ` / ${state.lang === "ja" ? "水没" : "Flooded"}: ${changes.flooded} / ${state.lang === "ja" ? "新たな陸地" : "Exposed"}: ${changes.exposed}` : ""}`; applyTheme(t); updateReadout(); updateComparisonReadout(); if (projectionHelpOpen) renderProjectionHelp(); persistState();
 }
 function applyTheme(t: typeof themes[ThemeName]) { const root = document.documentElement; for (const [key, value] of Object.entries({ bg: t.bg, panel: t.panel, accent: t.accent, border: t.border, text: t.accent })) root.style.setProperty(`--${key}`, value); }
 function updateInputs() { $(HTMLInputElement, "lng").value = state.lng.toFixed(2); $(HTMLInputElement, "lat").value = state.lat.toFixed(2); $(HTMLInputElement, "roll").value = state.roll.toFixed(1); $(HTMLInputElement, "scale").value = String(Math.round(state.scale)); $(HTMLInputElement, "sea-level").value = String(Math.round(state.seaLevel)); $(HTMLInputElement, "a-lng").value = state.lng.toFixed(2); $(HTMLInputElement, "a-lat").value = state.lat.toFixed(2); $(HTMLInputElement, "b-lng").value = compareCoord[0].toFixed(2); $(HTMLInputElement, "b-lat").value = compareCoord[1].toFixed(2); }
@@ -206,5 +271,5 @@ function buildUI() {
   const endPointer = (e: PointerEvent) => { activePointers.delete(e.pointerId); pointerStart = null; if (activePointers.size < 2) pinchStartDistance = null; }; canvas.addEventListener("pointerup", endPointer); canvas.addEventListener("pointercancel", endPointer); canvas.addEventListener("wheel", e => { e.preventDefault(); state.scale *= e.deltaY > 0 ? .9 : 1.1; updateProjection(); render(); }, { passive: false });
 }
 
-async function init() { restoreState(); buildUI(); setLanguage(); try { const data: any = await d3.json("https://unpkg.com/world-atlas@2.0.2/countries-110m.json"); world = feature(data, data.objects.land); borders = mesh(data, data.objects.countries, (a: any, b: any) => a !== b); buildTerrainModel(); $("status").remove(); resize(); } catch { $("status").textContent = labels[state.lang].error; } window.addEventListener("resize", resize); }
+async function init() { restoreState(); buildUI(); setLanguage(); try { const data: any = await d3.json("https://unpkg.com/world-atlas@2.0.2/countries-110m.json"); world = feature(data, data.objects.land); borders = mesh(data, data.objects.countries, (a: any, b: any) => a !== b); buildTerrainModel(); $("status").remove(); resize(); loadRealTerrainData(); } catch { $("status").textContent = labels[state.lang].error; } window.addEventListener("resize", resize); }
 init();
