@@ -17,6 +17,7 @@ label { font-size:12px; }
 .compact-select select { width:100%; min-height:38px; }
 .readout { font-size:12px; }
 #comparison-controls { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
+#map-presets button { margin-top:8px; }
 .comparison-toggle { margin:0 0 10px; }
 #comparison-controls > .point-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
 #comparison-controls .point-grid strong { grid-column:1 / -1; }
