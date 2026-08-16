@@ -6,11 +6,11 @@ import "./style.css";
 type ProjectionName = "mercator" | "azimuthal" | "equalEarth" | "orthographic" | "equirectangular" | "sinusoidal" | "mollweide" | "goode";
 type Lang = "ja" | "en";
 type ThemeName = "classic" | "cyber" | "military" | "nature" | "paper";
-type LayerKey = "borders" | "cities" | "standardGrid" | "axisGrid" | "axis" | "circles" | "routes" | "tissot" | "terrain";
+type LayerKey = "borders" | "cities" | "standardGrid" | "axisGrid" | "axis" | "circles" | "routes" | "tissot";
 type Point = { name: string; coord: [number, number] };
 
 type AppState = {
-  projection: ProjectionName; lng: number; lat: number; roll: number; scale: number; seaLevel: number;
+  projection: ProjectionName; lng: number; lat: number; roll: number; scale: number;
   lang: Lang; theme: ThemeName; layers: Record<LayerKey, boolean>;
 };
 
@@ -41,17 +41,14 @@ function cityRegionLabel(region: string) { return state.lang === "ja" ? regionLa
 function isMajorCity(city: Point) { return majorCities.has(city.name) || city.name === "Null Island" || city.name.includes("Pole"); }
 
 const labels = {
-  ja: { title: "地図方位スタジオ", projection: "投影法", center: "中心地点", telemetry: "テレメトリ", lng: "経度", lat: "緯度", roll: "ロール", scale: "縮尺", seaLevel: "海面高度", layers: "レイヤー", borders: "国境線", cities: "都市名", standardGrid: "標準グリッド", axisGrid: "斜軸グリッド", axis: "中央軸", circles: "等距離円", routes: "大圏航路", tissot: "歪み指示円", terrain: "地形・水深（概念モデル）", theme: "テーマ", export: "PNG保存", guide: "ドラッグ: 中心移動 / Shift+ドラッグ: 回転 / ホイール: 拡大縮小", loading: "地図データを読み込み中…", error: "地図データを読み込めませんでした。ネットワークを確認してください。", distance: "距離", heading: "方位", search: "都市を検索", cityMode: "都市表示", majorCities: "主要都市のみ", allCities: "全都市", compareCity: "比較地点プリセット", pointA: "地点A", pointB: "地点B", pickA: "地図でAを指定", pickB: "地図でBを指定", comparison: "2地点比較", projectionInfo: "投影法の解説", close: "閉じる", projectionNames: { azimuthal: "正距方位図法", mercator: "メルカトル図法", equalEarth: "イコールアース図法", orthographic: "正射方位図法", equirectangular: "正距円筒図法", sinusoidal: "サンソン図法", mollweide: "モルワイデ図法", goode: "グード図法" } },
-  en: { title: "Map Orientation Studio", projection: "Projection", center: "Center preset", telemetry: "Telemetry", lng: "Longitude", lat: "Latitude", roll: "Roll", scale: "Scale", seaLevel: "Sea level", layers: "Layers", borders: "Borders", cities: "City names", standardGrid: "Standard grid", axisGrid: "Oblique grid", axis: "Central axis", circles: "Distance circles", routes: "Great-circle route", tissot: "Distortion circles", terrain: "Terrain & bathymetry (concept model)", theme: "Theme", export: "Export PNG", guide: "Drag: move center / Shift+drag: rotate / Wheel: zoom", loading: "Loading map data…", error: "Map data could not be loaded. Check your network connection.", distance: "Distance", heading: "Heading", search: "Search cities", cityMode: "City display", majorCities: "Major cities only", allCities: "All cities", compareCity: "Compare preset", pointA: "Point A", pointB: "Point B", pickA: "Pick A on map", pickB: "Pick B on map", comparison: "Two-point comparison", projectionInfo: "Projection guide", close: "Close", projectionNames: { azimuthal: "Azimuthal Equidistant", mercator: "Mercator", equalEarth: "Equal Earth", orthographic: "Orthographic", equirectangular: "Equirectangular", sinusoidal: "Sinusoidal", mollweide: "Mollweide", goode: "Goode Homolosine" } },
+  ja: { title: "地図方位スタジオ", projection: "投影法", center: "中心地点", telemetry: "テレメトリ", lng: "経度", lat: "緯度", roll: "ロール", scale: "縮尺", layers: "レイヤー", borders: "国境線", cities: "都市名", standardGrid: "標準グリッド", axisGrid: "斜軸グリッド", axis: "中央軸", circles: "等距離円", routes: "大圏航路", tissot: "歪み指示円", theme: "テーマ", export: "PNG保存", guide: "ドラッグ: 中心移動 / Shift+ドラッグ: 回転 / ホイール: 拡大縮小", loading: "地図データを読み込み中…", error: "地図データを読み込めませんでした。ネットワークを確認してください。", distance: "距離", heading: "方位", search: "都市を検索", cityMode: "都市表示", majorCities: "主要都市のみ", allCities: "全都市", compareCity: "比較地点プリセット", pointA: "地点A", pointB: "地点B", pickA: "地図でAを指定", pickB: "地図でBを指定", comparison: "2地点比較", projectionInfo: "投影法の解説", close: "閉じる", projectionNames: { azimuthal: "正距方位図法", mercator: "メルカトル図法", equalEarth: "イコールアース図法", orthographic: "正射方位図法", equirectangular: "正距円筒図法", sinusoidal: "サンソン図法", mollweide: "モルワイデ図法", goode: "グード図法" } },
+  en: { title: "Map Orientation Studio", projection: "Projection", center: "Center preset", telemetry: "Telemetry", lng: "Longitude", lat: "Latitude", roll: "Roll", scale: "Scale", layers: "Layers", borders: "Borders", cities: "City names", standardGrid: "Standard grid", axisGrid: "Oblique grid", axis: "Central axis", circles: "Distance circles", routes: "Great-circle route", tissot: "Distortion circles", theme: "Theme", export: "Export PNG", guide: "Drag: move center / Shift+drag: rotate / Wheel: zoom", loading: "Loading map data…", error: "Map data could not be loaded. Check your network connection.", distance: "Distance", heading: "Heading", search: "Search cities", cityMode: "City display", majorCities: "Major cities only", allCities: "All cities", compareCity: "Compare preset", pointA: "Point A", pointB: "Point B", pickA: "Pick A on map", pickB: "Pick B on map", comparison: "Two-point comparison", projectionInfo: "Projection guide", close: "Close", projectionNames: { azimuthal: "Azimuthal Equidistant", mercator: "Mercator", equalEarth: "Equal Earth", orthographic: "Orthographic", equirectangular: "Equirectangular", sinusoidal: "Sinusoidal", mollweide: "Mollweide", goode: "Goode Homolosine" } },
 } as const;
 
-const state: AppState = { projection: "azimuthal", lng: 139.76, lat: 35.68, roll: 0, scale: 100, seaLevel: 0, lang: "ja", theme: "classic", layers: { borders: true, cities: true, standardGrid: true, axisGrid: true, axis: true, circles: true, routes: false, tissot: false, terrain: false } };
+const state: AppState = { projection: "azimuthal", lng: 139.76, lat: 35.68, roll: 0, scale: 100, lang: "ja", theme: "classic", layers: { borders: true, cities: true, standardGrid: true, axisGrid: true, axis: true, circles: true, routes: false, tissot: false } };
 const canvas = document.createElement("canvas");
 const context = canvas.getContext("2d")!;
 let width = 1, height = 1, world: any, borders: any, projection: d3.GeoProjection;
-type TerrainCell = { lng: number; lat: number; polygon: { type: "Polygon"; coordinates: [number, number][][] }; elevation: number; originalLand: boolean };
-let terrainCells: TerrainCell[] = [];
-let terrainDataMode: "loading" | "real" | "fallback" = "loading";
 let pointerStart: { x: number; y: number } | null = null;
 const activePointers = new Map<number, { x: number; y: number }>();
 let pinchStartDistance: number | null = null;
@@ -73,7 +70,7 @@ function projectionFor(name: ProjectionName) {
   return d3.geoAzimuthalEquidistant().clipAngle(179.999);
 }
 function centerRotation() { return [-state.lng, -state.lat, state.roll] as [number, number, number]; }
-function clampState() { state.lng = Math.max(-180, Math.min(180, state.lng)); state.lat = Math.max(-89.9, Math.min(89.9, state.lat)); state.roll = ((state.roll % 360) + 360) % 360; state.scale = Math.max(30, Math.min(900, state.scale)); state.seaLevel = Math.max(-300, Math.min(300, state.seaLevel)); }
+function clampState() { state.lng = Math.max(-180, Math.min(180, state.lng)); state.lat = Math.max(-89.9, Math.min(89.9, state.lat)); state.roll = ((state.roll % 360) + 360) % 360; state.scale = Math.max(30, Math.min(900, state.scale)); }
 function fitScale() { return ["azimuthal", "orthographic"].includes(state.projection) ? Math.max(35, Math.min(width, height) * .48 / Math.PI) : Math.max(45, width / (2 * Math.PI)); }
 function updateProjection() { clampState(); projection = projectionFor(state.projection).translate([width / 2, height / 2]).scale(fitScale() * state.scale / 100).rotate(centerRotation()).precision(.1); }
 function pointDistance(a: [number, number], b: [number, number]) { return Math.round(d3.geoDistance(a, b) * 6371); }
@@ -81,109 +78,6 @@ function pointerDistance() { const points = [...activePointers.values()]; return
 function isCityVisible(city: Point) { if (state.projection === "orthographic" && d3.geoDistance([state.lng, state.lat], city.coord) > Math.PI / 2 + 0.01) return false; return Boolean(projection?.(city.coord)); }
 function initialBearing(a: [number, number], b: [number, number]) { const [lon1, lat1, lon2, lat2] = [a[0], a[1], b[0], b[1]].map(d => d * Math.PI / 180); const y = Math.sin(lon2 - lon1) * Math.cos(lat2); const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1); return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; }
 function comparisonCity() { return cities.find(city => city.coord[0] === compareCoord[0] && city.coord[1] === compareCoord[1]); }
-function containsLand(point: [number, number]) {
-  if (!world) return false;
-  if (world.type === "FeatureCollection") return world.features.some((item: any) => d3.geoContains(item, point));
-  // Pass the geometry explicitly; this also avoids differences between d3-geo
-  // versions when the TopoJSON conversion returns a Feature wrapper.
-  return d3.geoContains(world.type === "Feature" ? world.geometry : world, point);
-}
-function buildTerrainModel() {
-  if (!world) return;
-  const step = 5;
-  terrainCells = [];
-  for (let lat = -90; lat < 90; lat += step) for (let lng = -180; lng < 180; lng += step) {
-    const center: [number, number] = [lng + step / 2, Math.min(89.9, lat + step / 2)];
-    const isLand = containsLand(center);
-    const continentalVariation = Math.abs(Math.sin((lng + 27) * Math.PI / 36) * Math.cos((lat - 12) * Math.PI / 43));
-    const latVariation = Math.abs(Math.sin(lat * Math.PI / 180));
-    const elevation = isLand
-      ? 2 + continentalVariation * 2200 + latVariation * 900
-      : -(80 + continentalVariation * 4500 + latVariation * 1800);
-    terrainCells.push({ lng, lat, elevation, originalLand: isLand, polygon: { type: "Polygon", coordinates: [[[lng, lat], [lng + step, lat], [lng + step, lat + step], [lng, lat + step], [lng, lat]]] } });
-  }
-  const byCell = new Map(terrainCells.map(cell => [`${cell.lng},${cell.lat}`, cell]));
-  for (const cell of terrainCells) {
-    const neighbors = [[cell.lng - step, cell.lat], [cell.lng + step, cell.lat], [cell.lng, cell.lat - step], [cell.lng, cell.lat + step]]
-      .map(([lng, lat]) => byCell.get(`${lng},${lat}`));
-    if (neighbors.some(neighbor => neighbor && neighbor.originalLand !== cell.originalLand)) {
-      const coastalBand = .5 + Math.abs(Math.sin((cell.lng + 27) * Math.PI / 36) * Math.cos((cell.lat - 12) * Math.PI / 43)) * 9;
-      cell.elevation = cell.originalLand ? Math.min(cell.elevation, coastalBand) : -Math.min(Math.abs(cell.elevation), coastalBand);
-    }
-  }
-}
-const etopoSampleUrl = "https://oceanwatch.pifsc.noaa.gov/erddap/griddap/ETOPO_2022_v1_60s.csv?z[-87.5:300:87.5][2.5:300:357.5]";
-function cellKey(lng: number, lat: number) { return `${Math.floor((lng + 180) / 5) * 5},${Math.floor((lat + 90) / 5) * 5}`; }
-async function loadRealTerrainData() {
-  try {
-    const response = await fetch(etopoSampleUrl);
-    if (!response.ok) throw new Error(`ETOPO request failed: ${response.status}`);
-    const rows = (await response.text()).trim().split(/\r?\n/).slice(1);
-    const samples = new Map<string, number>();
-    for (const row of rows) {
-      const columns = row.split(",");
-      const lat = Number(columns[0]), rawLng = Number(columns[1]), elevation = Number(columns[2]);
-      if (!Number.isFinite(lat) || !Number.isFinite(rawLng) || !Number.isFinite(elevation)) continue;
-      const lng = rawLng > 180 ? rawLng - 360 : rawLng;
-      samples.set(cellKey(lng, lat), elevation);
-    }
-    if (samples.size < 1000) throw new Error(`ETOPO sample incomplete: ${samples.size}`);
-    let matched = 0;
-    for (const cell of terrainCells) {
-      const elevation = samples.get(`${cell.lng},${cell.lat}`);
-      if (elevation === undefined) continue;
-      cell.elevation = elevation;
-      cell.originalLand = elevation >= 0;
-      matched += 1;
-    }
-    if (matched < 1000) throw new Error(`ETOPO grid mismatch: ${matched}`);
-    terrainDataMode = "real";
-  } catch (error) {
-    console.warn("ETOPO terrain data unavailable; using the conceptual fallback model.", error);
-    terrainDataMode = "fallback";
-  }
-  render();
-}
-function terrainColor(elevation: number, originalLand: boolean) {
-  if (originalLand) {
-    if (elevation < state.seaLevel) return "#3d83a0";
-    return elevation > 3000 ? "#8b735c" : elevation > 1500 ? "#9e9c6b" : elevation > 500 ? "#91b477" : "#b8c98a";
-  }
-  if (elevation >= state.seaLevel) return "#c6b57c";
-  return elevation < -4000 ? "#173c59" : elevation < -1500 ? "#28617b" : "#66a9b8";
-}
-function seaLevelChanges() {
-  return terrainCells.reduce((result, cell) => {
-    if (cell.originalLand && cell.elevation < state.seaLevel) result.flooded += 1;
-    if (!cell.originalLand && cell.elevation >= state.seaLevel) result.exposed += 1;
-    return result;
-  }, { flooded: 0, exposed: 0 });
-}
-function drawTerrainCell(cell: TerrainCell) {
-  const projected = cell.polygon.coordinates[0].map(coord => projection(coord as [number, number]));
-  if (projected.some(point => !point || !Number.isFinite(point[0]) || !Number.isFinite(point[1]))) return false;
-  const points = projected as [number, number][];
-  context.beginPath();
-  context.moveTo(points[0][0], points[0][1]);
-  for (const point of points.slice(1)) context.lineTo(point[0], point[1]);
-  context.closePath();
-  return true;
-}
-function drawTerrain(path: d3.GeoPath<any, d3.GeoPermissibleObjects>) {
-  for (const cell of terrainCells) {
-    const flooded = cell.originalLand && cell.elevation < state.seaLevel;
-    const exposed = !cell.originalLand && cell.elevation >= state.seaLevel;
-    const showBathymetry = !cell.originalLand && !exposed;
-    if (!flooded && !exposed && !showBathymetry) continue;
-    if (!drawTerrainCell(cell)) continue;
-    context.globalAlpha = flooded || exposed ? .88 : .32;
-    context.fillStyle = flooded ? "#20b8e8" : exposed ? "#ffd166" : terrainColor(cell.elevation, false);
-    context.fill();
-    if (flooded || exposed) { context.globalAlpha = .98; context.strokeStyle = flooded ? "#d7f7ff" : "#fff2ba"; context.lineWidth = 1; context.stroke(); }
-  }
-  context.globalAlpha = 1;
-  return seaLevelChanges();
-}
 const projectionGuides = { ja: {
   azimuthal: { name: "正距方位図法", overview: "指定した中心地点から各地点までの距離と方位を正しく表す方位図法です。中心からの大圏距離が地図上の半径に対応します。", features: "中心から離れるほど形や面積の歪みが増え、表示できる最大距離は地球の反対側付近までです。極を中心にすると経線が中心から放射状に並びます。", normal: "通常は北極を中心にした極方位図、または特定の都市を中心にして北を上にした地図として使います。軸は経線・緯線の基準方向です。", changed: "中心を東京や任意の地点へ移すと、その地点から見た距離と方位の関係が読みやすくなります。ロールを変えると、中心を正面にしたまま地図の上下左右の基準を回せます。", useful: "航空路、通信・到達範囲、中心都市からの距離比較、極域の航路分析に役立ちます." },
   mercator: { name: "メルカトル図法", overview: "角度を保つ正角円筒図法です。一定方位の航路（等角航路）が地図上で直線になる性質があります。", features: "緯度が高くなるほど面積と距離の縮尺が大きくなり、極では無限大になるため通常は極を表示しません。", normal: "通常軸メルカトル図法では、赤道を基準に北を上、経線を縦、緯線を横にします。", changed: "横メルカトル図法では、地球を90度回したように、選んだ経線を主軸・中央経線として低歪みの基準にします。斜軸メルカトル図法では、その主軸を任意の向きへ傾けます。このアプリでは中心を任意の地点に置き、ロールで新しい北方向を回転できます。中心から上へ90度離れた地点が新しい北極、下へ90度離れた地点が新しい南極となるため、通常の北極・南極とは異なる軸で地域を見られます。これは投影の性質を体験するための回転であり、UTMなどの測地系をそのまま実装したものではありません。", useful: "通常軸は航海図、横軸は南北に細長い地域や帯状の測量、斜軸は斜めに延びる地域・大圏方向の観察に役立ちます。" },
@@ -204,8 +98,8 @@ const projectionGuides = { ja: {
   goode: { name: "Goode Homolosine", overview: "An interrupted equal-area projection combining sinusoidal and Mollweide zones.", features: "Interruptions are placed mainly through oceans to reduce land distortion, but ocean-spanning routes are broken.", normal: "The usual aspect places several lobes north-up, preserving area within each lobe.", changed: "Changing center longitude changes the reference direction and seam arrangement for exploration. Center and roll do not remove the equal-area property.", useful: "Useful for comparing continental distributions and global statistics with reduced land-shape distortion." }
 } } as const;
 const orientationGuides = { ja: { center: ["中心は、地図の正面に向ける地点です。正距方位図法では、中心からの距離と方位を読む基準になります。", "東京中心なら東京から見た世界、北極中心なら北極から見た世界になります。航路、通信範囲、地域間の関係を観察するときに役立ちます。"], axis: ["ロールは、中心を正面に向けたまま地図を時計回り・反時計回りに回す角度です。", "北を上に固定しないことで、中心地点から見た前方・左右・上下の関係や、斜めの基準軸を比較できます。"], pole: ["極を中心に設定すると、極から見た経度方向の広がりと、緯度線の集まり方を観察できます。", "北極・南極付近の航路、極域の面積歪み、日付変更線や経度線の連続性を見るときに役立ちます。"] }, en: { center: ["The center is the point facing the viewer. In an azimuthal equidistant map, it is the reference for distance and direction.", "Centering Tokyo shows the world from Tokyo; centering the North Pole shows the world from the pole. This helps inspect routes, reach and regional relationships."], axis: ["Roll rotates the map clockwise or counterclockwise while keeping the center facing you.", "It lets you compare forward, sideways and diagonal relationships without forcing north to remain at the top."], pole: ["Centering a pole reveals how longitude fans out and how latitude circles gather around the pole.", "It is useful for polar routes, high-latitude distortion, the date line and the continuity of meridians."] } } as const;
-function persistState() { const params = new URLSearchParams({ projection: state.projection, lng: state.lng.toFixed(2), lat: state.lat.toFixed(2), roll: state.roll.toFixed(1), scale: String(Math.round(state.scale)), seaLevel: String(Math.round(state.seaLevel)), lang: state.lang, theme: state.theme, layers: Object.entries(state.layers).filter(([, enabled]) => enabled).map(([key]) => key).join(",") }); history.replaceState(null, "", `${location.pathname}${location.search}#${params}`); }
-function restoreState() { const params = new URLSearchParams(location.hash.slice(1)); const projectionNames: ProjectionName[] = ["mercator", "azimuthal", "equalEarth", "orthographic", "equirectangular", "sinusoidal", "mollweide", "goode"]; const projectionValue = params.get("projection"); if (projectionValue && projectionNames.includes(projectionValue as ProjectionName)) state.projection = projectionValue as ProjectionName; for (const key of ["lng", "lat", "roll", "scale", "seaLevel"] as const) { const value = Number(params.get(key)); if (Number.isFinite(value)) state[key] = value; } const langValue = params.get("lang"); if (langValue === "en" || langValue === "ja") state.lang = langValue; const themeValue = params.get("theme"); if (themeValue && themeValue in themes) state.theme = themeValue as ThemeName; if (params.has("layers")) { const enabled = new Set((params.get("layers") || "").split(",")); for (const key of Object.keys(state.layers) as LayerKey[]) state.layers[key] = enabled.has(key); } }
+function persistState() { const params = new URLSearchParams({ projection: state.projection, lng: state.lng.toFixed(2), lat: state.lat.toFixed(2), roll: state.roll.toFixed(1), scale: String(Math.round(state.scale)), lang: state.lang, theme: state.theme, layers: Object.entries(state.layers).filter(([, enabled]) => enabled).map(([key]) => key).join(",") }); history.replaceState(null, "", `${location.pathname}${location.search}#${params}`); }
+function restoreState() { const params = new URLSearchParams(location.hash.slice(1)); const projectionNames: ProjectionName[] = ["mercator", "azimuthal", "equalEarth", "orthographic", "equirectangular", "sinusoidal", "mollweide", "goode"]; const projectionValue = params.get("projection"); if (projectionValue && projectionNames.includes(projectionValue as ProjectionName)) state.projection = projectionValue as ProjectionName; for (const key of ["lng", "lat", "roll", "scale"] as const) { const value = Number(params.get(key)); if (Number.isFinite(value)) state[key] = value; } const langValue = params.get("lang"); if (langValue === "en" || langValue === "ja") state.lang = langValue; const themeValue = params.get("theme"); if (themeValue && themeValue in themes) state.theme = themeValue as ThemeName; if (params.has("layers")) { const enabled = new Set((params.get("layers") || "").split(",")); for (const key of Object.keys(state.layers) as LayerKey[]) state.layers[key] = enabled.has(key); } }
 
 function render() {
   if (!world || !projection) return;
@@ -213,12 +107,7 @@ function render() {
   context.clearRect(0, 0, width, height); context.fillStyle = t.bg; context.fillRect(0, 0, width, height);
   context.beginPath(); path({ type: "Sphere" }); context.fillStyle = t.sea; context.fill();
   if (state.layers.standardGrid) { context.beginPath(); path(graticule()); context.strokeStyle = t.grid; context.lineWidth = .5; context.stroke(); }
-  let changes = { flooded: 0, exposed: 0 };
-  if (state.layers.terrain) {
-    context.beginPath(); path(world); context.fillStyle = t.land; context.fill();
-    changes = drawTerrain(path);
-    context.beginPath(); path(world); context.strokeStyle = "rgba(255,255,255,.75)"; context.lineWidth = .8; context.stroke();
-  } else { context.beginPath(); path(world); context.fillStyle = t.land; context.fill(); }
+  context.beginPath(); path(world); context.fillStyle = t.land; context.fill();
   if (state.layers.borders) { context.beginPath(); path(borders); context.strokeStyle = t.border; context.lineWidth = .7; context.stroke(); }
   if (state.layers.axisGrid) {
     context.strokeStyle = t.grid; context.lineWidth = .7;
@@ -230,10 +119,10 @@ function render() {
   if (state.projection === "azimuthal" && state.layers.circles) { context.strokeStyle = t.circle; context.lineWidth = 1.1; context.setLineDash([4, 6]); for (let km = 30; km < 180; km += 30) { context.beginPath(); path(d3.geoCircle().center([state.lng, state.lat]).radius(km)()); context.stroke(); } context.setLineDash([]); }
   if (state.layers.axis) { context.strokeStyle = "#f0f"; context.setLineDash([5, 5]); context.beginPath(); context.moveTo(width / 2, 0); context.lineTo(width / 2, height); context.moveTo(0, height / 2); context.lineTo(width, height / 2); context.stroke(); context.setLineDash([]); }
   if (state.layers.cities) { context.font = `${width < 520 ? 8 : 10}px SF Mono, Menlo, monospace`; context.fillStyle = t.accent; for (const city of cities) { const p = projection(city.coord); if (cityMode === "major" && !isMajorCity(city)) continue; if (!isCityVisible(city) || !p || p[0] <= 0 || p[0] >= width || p[1] <= 0 || p[1] >= height) continue; context.beginPath(); context.arc(p[0], p[1], 2, 0, Math.PI * 2); context.fill(); context.fillText(cityName(city), p[0] + 5, p[1] + 3); } }
-  updateInputs(); const dataLabel = terrainDataMode === "real" ? (state.lang === "ja" ? "実データ" : "Real data") : terrainDataMode === "loading" ? (state.lang === "ja" ? "読み込み中" : "Loading") : (state.lang === "ja" ? "概念モデル" : "Concept model"); $("sea-level-readout").textContent = `${state.lang === "ja" ? "設定値" : "Set value"}: ${state.seaLevel > 0 ? "+" : ""}${Math.round(state.seaLevel)} m / ${dataLabel}${state.layers.terrain ? ` / ${state.lang === "ja" ? "水没" : "Flooded"}: ${changes.flooded} / ${state.lang === "ja" ? "新たな陸地" : "Exposed"}: ${changes.exposed}` : ""}`; applyTheme(t); updateReadout(); updateComparisonReadout(); if (projectionHelpOpen) renderProjectionHelp(); persistState();
+  updateInputs(); applyTheme(t); updateReadout(); updateComparisonReadout(); if (projectionHelpOpen) renderProjectionHelp(); persistState();
 }
 function applyTheme(t: typeof themes[ThemeName]) { const root = document.documentElement; for (const [key, value] of Object.entries({ bg: t.bg, panel: t.panel, accent: t.accent, border: t.border, text: t.accent })) root.style.setProperty(`--${key}`, value); }
-function updateInputs() { $(HTMLInputElement, "lng").value = state.lng.toFixed(2); $(HTMLInputElement, "lat").value = state.lat.toFixed(2); $(HTMLInputElement, "roll").value = state.roll.toFixed(1); $(HTMLInputElement, "scale").value = String(Math.round(state.scale)); $(HTMLInputElement, "sea-level").value = String(Math.round(state.seaLevel)); $(HTMLInputElement, "a-lng").value = state.lng.toFixed(2); $(HTMLInputElement, "a-lat").value = state.lat.toFixed(2); $(HTMLInputElement, "b-lng").value = compareCoord[0].toFixed(2); $(HTMLInputElement, "b-lat").value = compareCoord[1].toFixed(2); }
+function updateInputs() { $(HTMLInputElement, "lng").value = state.lng.toFixed(2); $(HTMLInputElement, "lat").value = state.lat.toFixed(2); $(HTMLInputElement, "roll").value = state.roll.toFixed(1); $(HTMLInputElement, "scale").value = String(Math.round(state.scale)); $(HTMLInputElement, "a-lng").value = state.lng.toFixed(2); $(HTMLInputElement, "a-lat").value = state.lat.toFixed(2); $(HTMLInputElement, "b-lng").value = compareCoord[0].toFixed(2); $(HTMLInputElement, "b-lat").value = compareCoord[1].toFixed(2); }
 function updateReadout(coords?: [number, number]) { const t = labels[state.lang]; $("distance").textContent = `${t.distance}: ${coords ? pointDistance([state.lng, state.lat], coords).toLocaleString() : "—"} km`; }
 function updateComparisonReadout() { const t = labels[state.lang], city = comparisonCity(), distance = pointDistance([state.lng, state.lat], compareCoord); $("comparison").textContent = `${t.comparison}: ${Math.round(state.lng * 100) / 100}°, ${Math.round(state.lat * 100) / 100}° → ${city ? cityName(city) : `${compareCoord[0].toFixed(2)}°, ${compareCoord[1].toFixed(2)}°`} / ${distance.toLocaleString()} km / ${Math.round(initialBearing([state.lng, state.lat], compareCoord))}°`; }
 function $(id: string): HTMLElement;
@@ -243,18 +132,15 @@ function refreshCityOptions() { const query = cityQuery.trim().toLocaleLowerCase
 function renderProjectionHelp() { const t = labels[state.lang], guide = projectionGuides[state.lang][state.projection], concepts = orientationGuides[state.lang]; $("projection-help").innerHTML = `<div class="help-head"><strong>${t.projectionInfo}</strong><button id="close-help" type="button">${t.close}</button></div><h3>${guide.name}</h3><h4>${state.lang === "ja" ? "概要" : "Overview"}</h4><p>${guide.overview}</p><h4>${state.lang === "ja" ? "特徴" : "Characteristics"}</h4><p>${guide.features}</p><div class="concept-block"><h4>${state.lang === "ja" ? "今回の中心・軸・極の設定" : "Center, axis and pole settings in this app"}</h4><p><strong>${state.lang === "ja" ? "通常の場合" : "Normal setting"}</strong><br>${guide.normal}</p><p><strong>${state.lang === "ja" ? "変更した場合" : "When changed"}</strong><br>${guide.changed}</p><p><strong>${state.lang === "ja" ? "活用できる場面" : "Useful for"}</strong><br>${guide.useful}</p></div><div class="concept-block"><h4>${state.lang === "ja" ? "現在の操作値" : "Current controls"}</h4><p>${state.lang === "ja" ? "中心" : "Center"}: ${state.lng.toFixed(2)}°, ${state.lat.toFixed(2)}° / ${state.lang === "ja" ? "ロール" : "Roll"}: ${state.roll.toFixed(1)}°</p><p>${concepts.center[0]}</p><p>${concepts.axis[0]}</p><p>${concepts.pole[0]}</p></div>`; $("projection-help").classList.toggle("open", projectionHelpOpen); $("close-help").addEventListener("click", () => { projectionHelpOpen = false; renderProjectionHelp(); }); }
 function setLanguage() { const t = labels[state.lang]; document.documentElement.lang = state.lang === "ja" ? "ja" : "en"; document.title = t.title; document.querySelectorAll<HTMLElement>("[data-label]").forEach(el => { const key = el.dataset.label as keyof typeof t; if (typeof t[key] === "string") el.textContent = t[key] as string; }); document.querySelectorAll<HTMLInputElement>("[data-label-placeholder]").forEach(input => { input.placeholder = t[input.dataset.labelPlaceholder as keyof typeof t] as string; }); document.querySelectorAll<HTMLOptionElement>("[data-projection]").forEach(option => { option.textContent = t.projectionNames[option.dataset.projection as ProjectionName]; }); $("guide").textContent = t.guide; refreshCityOptions(); renderProjectionHelp(); render(); }
 function syncInput() { state.lng = Number($(HTMLInputElement, "lng").value); state.lat = Number($(HTMLInputElement, "lat").value); state.roll = Number($(HTMLInputElement, "roll").value); state.scale = Number($(HTMLInputElement, "scale").value); updateProjection(); render(); }
-function syncSeaLevel() { state.seaLevel = Number($(HTMLInputElement, "sea-level").value); state.layers.terrain = true; ($( "layer-terrain") as HTMLInputElement).checked = true; clampState(); render(); }
 function resize() { const box = $("map-container").getBoundingClientRect(), dpr = window.devicePixelRatio || 1; width = Math.max(1, box.width); height = Math.max(1, box.height); canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr); canvas.style.width = `${width}px`; canvas.style.height = `${height}px`; context.setTransform(dpr, 0, 0, dpr, 0, 0); updateProjection(); render(); }
 function exportPng() { const link = document.createElement("a"); link.download = `map-orientation-studio-${state.projection}.png`; link.href = canvas.toDataURL("image/png"); link.click(); }
 
 function buildUI() {
-  document.querySelector<HTMLDivElement>("#app")!.innerHTML = `<aside id="sidebar"><h1 data-label="title"></h1><div class="version">v0.5.0</div><section><div class="title-row"><h2 data-label="projection"></h2><button id="projection-info" class="info-button" type="button">i</button></div><select id="projection"><option data-projection="azimuthal" value="azimuthal"></option><option data-projection="mercator" value="mercator"></option><option data-projection="equalEarth" value="equalEarth"></option><option data-projection="orthographic" value="orthographic"></option><option data-projection="equirectangular" value="equirectangular"></option><option data-projection="sinusoidal" value="sinusoidal"></option><option data-projection="mollweide" value="mollweide"></option><option data-projection="goode" value="goode"></option></select></section><section><h2 data-label="center"></h2><input id="city-search" type="search" data-label-placeholder="search" placeholder=""><select id="city"></select><label class="compact-select"><span data-label="cityMode"></span><select id="city-mode"><option value="major" data-label="majorCities"></option><option value="all" data-label="allCities"></option></select></label><label class="compact-select"><span data-label="compareCity"></span><select id="city-compare"></select></label><div class="point-grid"><div><strong data-label="pointA"></strong><input id="a-lng" type="number" step=".01"><input id="a-lat" type="number" step=".01"><button id="pick-a" type="button" data-label="pickA"></button></div><div><strong data-label="pointB"></strong><input id="b-lng" type="number" step=".01"><input id="b-lat" type="number" step=".01"><button id="pick-b" type="button" data-label="pickB"></button></div></div><div id="comparison" class="readout"></div></section><section><h2 data-label="telemetry"></h2><label><span data-label="lng"></span><input id="lng" type="number" step=".01"></label><label><span data-label="lat"></span><input id="lat" type="number" step=".01"></label><label><span data-label="roll"></span><input id="roll" type="number" step=".1"></label><label><span data-label="scale"></span><input id="scale" type="number" step="1"></label><label class="sea-level-control"><span data-label="seaLevel"></span><input id="sea-level" type="range" min="-300" max="300" step="1" value="0"></label><select id="sea-level-preset"><option value="0">現在 / Present</option><option value="-125">最終氷期 / Last Glacial Maximum</option><option value="1">海面 +1m / Sea level +1m</option><option value="5">海面 +5m / Sea level +5m</option><option value="10">海面 +10m / Sea level +10m</option></select><div class="readout" id="sea-level-readout"></div><div id="distance" class="readout"></div></section><section><h2 data-label="layers"></h2>${(["borders", "cities", "standardGrid", "axisGrid", "axis", "circles", "routes", "tissot", "terrain"] as LayerKey[]).map(k => `<label class="toggle"><span data-label="${k}"></span><input id="layer-${k}" type="checkbox" checked><span class="switch"></span></label>`).join("")}</section><section><h2 data-label="theme"></h2><select id="theme"><option value="classic">Classic</option><option value="cyber">Cyber</option><option value="military">Military</option><option value="nature">Nature</option><option value="paper">Paper</option></select></section><footer><button id="export" data-label="export"></button><button id="lang">English / 日本語</button></footer></aside><main id="map-container"><div id="status" data-label="loading"></div><div id="guide"></div><aside id="projection-help"></aside></main>`;
+  document.querySelector<HTMLDivElement>("#app")!.innerHTML = `<aside id="sidebar"><h1 data-label="title"></h1><div class="version">v0.4.0</div><section><div class="title-row"><h2 data-label="projection"></h2><button id="projection-info" class="info-button" type="button">i</button></div><select id="projection"><option data-projection="azimuthal" value="azimuthal"></option><option data-projection="mercator" value="mercator"></option><option data-projection="equalEarth" value="equalEarth"></option><option data-projection="orthographic" value="orthographic"></option><option data-projection="equirectangular" value="equirectangular"></option><option data-projection="sinusoidal" value="sinusoidal"></option><option data-projection="mollweide" value="mollweide"></option><option data-projection="goode" value="goode"></option></select></section><section><h2 data-label="center"></h2><input id="city-search" type="search" data-label-placeholder="search" placeholder=""><select id="city"></select><label class="compact-select"><span data-label="cityMode"></span><select id="city-mode"><option value="major" data-label="majorCities"></option><option value="all" data-label="allCities"></option></select></label><label class="compact-select"><span data-label="compareCity"></span><select id="city-compare"></select></label><div class="point-grid"><div><strong data-label="pointA"></strong><input id="a-lng" type="number" step=".01"><input id="a-lat" type="number" step=".01"><button id="pick-a" type="button" data-label="pickA"></button></div><div><strong data-label="pointB"></strong><input id="b-lng" type="number" step=".01"><input id="b-lat" type="number" step=".01"><button id="pick-b" type="button" data-label="pickB"></button></div></div><div id="comparison" class="readout"></div></section><section><h2 data-label="telemetry"></h2><label><span data-label="lng"></span><input id="lng" type="number" step=".01"></label><label><span data-label="lat"></span><input id="lat" type="number" step=".01"></label><label><span data-label="roll"></span><input id="roll" type="number" step=".1"></label><label><span data-label="scale"></span><input id="scale" type="number" step="1"></label><div id="distance" class="readout"></div></section><section><h2 data-label="layers"></h2>${(["borders", "cities", "standardGrid", "axisGrid", "axis", "circles", "routes", "tissot"] as LayerKey[]).map(k => `<label class="toggle"><span data-label="${k}"></span><input id="layer-${k}" type="checkbox" checked><span class="switch"></span></label>`).join("")}</section><section><h2 data-label="theme"></h2><select id="theme"><option value="classic">Classic</option><option value="cyber">Cyber</option><option value="military">Military</option><option value="nature">Nature</option><option value="paper">Paper</option></select></section><footer><button id="export" data-label="export"></button><button id="lang">English / 日本語</button></footer></aside><main id="map-container"><div id="status" data-label="loading"></div><div id="guide"></div><aside id="projection-help"></aside></main>`;
   ( $("projection") as HTMLSelectElement).value = state.projection; ($( "theme") as HTMLSelectElement).value = state.theme;
   refreshCityOptions(); ($( "city-mode") as HTMLSelectElement).value = cityMode;
   $("projection").addEventListener("change", e => { state.projection = (e.target as HTMLSelectElement).value as ProjectionName; updateProjection(); render(); });
   $("projection-info").addEventListener("click", () => { projectionHelpOpen = !projectionHelpOpen; renderProjectionHelp(); });
-  $("sea-level").addEventListener("input", syncSeaLevel);
-  $("sea-level-preset").addEventListener("change", e => { state.seaLevel = Number((e.target as HTMLSelectElement).value); state.layers.terrain = true; ($( "layer-terrain") as HTMLInputElement).checked = true; render(); });
   $("city").addEventListener("change", e => { [state.lng, state.lat] = JSON.parse((e.target as HTMLSelectElement).value); updateProjection(); render(); });
   $("city-compare").addEventListener("change", e => { compareCoord = JSON.parse((e.target as HTMLSelectElement).value); render(); });
   $("pick-a").addEventListener("click", () => { pickTarget = "a"; $("guide").textContent = state.lang === "ja" ? "地図上をクリックして地点Aを指定してください" : "Click the map to set point A"; });
@@ -271,5 +157,5 @@ function buildUI() {
   const endPointer = (e: PointerEvent) => { activePointers.delete(e.pointerId); pointerStart = null; if (activePointers.size < 2) pinchStartDistance = null; }; canvas.addEventListener("pointerup", endPointer); canvas.addEventListener("pointercancel", endPointer); canvas.addEventListener("wheel", e => { e.preventDefault(); state.scale *= e.deltaY > 0 ? .9 : 1.1; updateProjection(); render(); }, { passive: false });
 }
 
-async function init() { restoreState(); buildUI(); setLanguage(); try { const data: any = await d3.json("https://unpkg.com/world-atlas@2.0.2/countries-110m.json"); world = feature(data, data.objects.land); borders = mesh(data, data.objects.countries, (a: any, b: any) => a !== b); buildTerrainModel(); $("status").remove(); resize(); loadRealTerrainData(); } catch { $("status").textContent = labels[state.lang].error; } window.addEventListener("resize", resize); }
+async function init() { restoreState(); buildUI(); setLanguage(); try { const data: any = await d3.json("https://unpkg.com/world-atlas@2.0.2/countries-110m.json"); world = feature(data, data.objects.land); borders = mesh(data, data.objects.countries, (a: any, b: any) => a !== b); $("status").remove(); resize(); } catch { $("status").textContent = labels[state.lang].error; } window.addEventListener("resize", resize); }
 init();
