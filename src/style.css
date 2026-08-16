@@ -19,8 +19,8 @@ label { font-size:12px; }
 #comparison-controls { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
 .comparison-toggle { margin:0 0 10px; }
 #comparison-controls > .point-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
-#comparison-controls > .point-grid strong { grid-column:1 / -1; }
-#comparison-controls > .point-grid button { grid-column:1 / -1; }
+#comparison-controls .point-grid strong { grid-column:1 / -1; }
+#comparison-controls .point-grid > button { grid-column:1 / -1; }
 #comparison-controls > .point-grid .coordinate-input { display:grid; grid-template-columns:42px minmax(0,1fr); align-items:center; gap:6px; }
 #comparison-controls > .point-grid .coordinate-input label { margin:0; font-size:11px; }
 #comparison-controls > .point-grid .coordinate-input input { min-width:0; min-height:34px; }
